@@ -1,0 +1,42 @@
+name: Build and Email
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build-and-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install eas
+        run: npm install -g eas-cli
+        
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run tests
+        run: npm test
+
+      - name: Build APK
+        run: eas build --profile production --platform android
+
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.example.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: 'Build Complete'
+          to: 'karim@ninjaz.ae'
+          from: 'your-email@example.com'
+          body: 'The build is complete and the APK is ready.'
