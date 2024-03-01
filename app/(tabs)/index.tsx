@@ -1,4 +1,11 @@
-import { Dimensions, FlatList, ScrollView, RefreshControl, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  Dimensions,
+  FlatList,
+  ScrollView,
+  RefreshControl,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { View } from "@/components/Themed";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -28,7 +35,7 @@ export default function TabOneScreen() {
       if (page === 1) {
         setPosts(response.data.data);
       } else {
-        setPosts(prevPosts => [...prevPosts, ...response.data.data] as any);
+        setPosts((prevPosts) => [...prevPosts, ...response.data.data] as any);
       }
       setHasMorePosts(response.data.data.length > 0);
     } catch (error) {
@@ -50,7 +57,7 @@ export default function TabOneScreen() {
 
   const handleLoadMore = () => {
     if (!isLoading && hasMorePosts) {
-      setPage(prevPage => prevPage + 1);
+      setPage((prevPage) => prevPage + 1);
     }
   };
 
@@ -58,30 +65,35 @@ export default function TabOneScreen() {
     <SafeAreaProvider style={styles.listContainer}>
       <FlatList
         data={posts}
-        renderItem={({ item }:{item: Post_API}) => (
+        renderItem={({ item }: { item: Post_API }) => (
           <View style={styles.container}>
             <PostCard
-              imageUrl={item.image}
-              text={item.text}
-              ownerName={item.owner.firstName + " " + item.owner.lastName}
-              creationDate={formatDistanceToNow(new Date(item.publishDate), {
-                addSuffix: true,
-              })}
-              tags={item.tags}
-              likes={item.likes}
+              imageUrl={item.image || "No Image"}
+              text={item.text || "No text available"} 
+              ownerName={
+                item.owner && item.owner.firstName && item.owner.lastName
+                  ? `${item.owner.firstName} ${item.owner.lastName}`
+                  : "Unknown Owner"
+              } 
+              creationDate={
+                item.publishDate
+                  ? formatDistanceToNow(new Date(item.publishDate), {
+                      addSuffix: true,
+                    })
+                  : "Unknown Date"
+              } 
+              tags={item.tags || []}
+              likes={item.likes || 0}
             />
           </View>
         )}
-        testID="flat" 
-        keyExtractor={item => item.text + item.id}
+        testID="flat"
+        keyExtractor={(item) => item.text + item.id}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.1}
         ListFooterComponent={isLoading ? <ActivityIndicator /> : null}
         refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={handleRefresh}
-          />
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
         }
       />
     </SafeAreaProvider>
@@ -98,7 +110,7 @@ const styles = StyleSheet.create({
     height: 150,
     padding: 10,
     width: Dimensions.get("screen").width,
-    marginVertical: 10
+    marginVertical: 10,
   },
   postsContainer: {
     fontSize: 20,
@@ -111,6 +123,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
     height: "100%",
-    backgroundColor: tintColorWarmBackground
+    backgroundColor: tintColorWarmBackground,
   },
 });
